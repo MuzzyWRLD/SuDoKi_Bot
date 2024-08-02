@@ -29,6 +29,34 @@ client.on('interactionCreate', async interaction => {
     }
 });
 
+client.on('ready', () => {
+  console.log(`Logged in as ${client.user.tag}!`);   
+
+
+  const commandData = new SlashCommandBuilder()
+      .setName('zeit')
+      .setDescription('Zeigt die aktuelle Uhrzeit an');
+
+  client.application.commands.create(commandData);
+});
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;   
+
+
+  const { commandName } = interaction;
+
+  if (commandName   
+=== 'zeit') {
+      const options = { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+      const formatter = new Intl.DateTimeFormat('de-DE', options); // Ändere 'de-DE' auf deine gewünschte Sprache
+      const now = new Date();
+      const formattedTime = formatter.format(now);
+
+      await interaction.reply(`Es ist gerade: ${formattedTime}`);
+  }
+});
+
 client.login('MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECyJMDD6XQ');
 
 
