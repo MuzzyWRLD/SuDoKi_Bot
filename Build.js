@@ -1,70 +1,82 @@
-const {
-  SlashCommandBuilder,
-  Client,
-  GatewayIntentBits,
-} = require("discord.js");
+const { Client, GatewayIntentBits, SlashCommandBuilder, Permissions } = require('discord.js');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
-client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}!`);
+// Ersetze mit deinem Bot-Token und der tatsächlichen Rollen-ID
+const token = "MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECyJMDD6XQ";
+const adminRoleId = "1247589119375183912";
 
-  const commandData = new SlashCommandBuilder()
-    .setName("greet")
-    .setDescription("Begrüßt einen Benutzer")
-    .addUserOption(option =>
-      option
-        .setName("target")
-        .setDescription("Der Benutzer, der begrüßt werden soll")
-        .setRequired(true)
-    );
+client.on('ready', () => {
+    console.log(`Eingeloggt als ${client.user.tag}!`);
 
-  client.application.commands.create(commandData);
+    // Slash-Commands erstellen
+    const commands = [
+        new SlashCommandBuilder()
+            .setName('role')
+            .setDescription('Verwaltet Rollen')
+            .addUserOption(option =>
+                option
+                    .setName('user')
+                    .setDescription('Der Benutzer, dem die Rolle zugewiesen werden soll')
+                    .setRequired(true)
+            )
+            .addRoleOption(option =>
+                option
+                    .setName('role')
+                    .setDescription('Die Rolle, die zugewiesen oder entzogen werden soll')
+                    .setRequired(true)
+            )
+    ];
+
+    client.application.commands.set(commands);
 });
 
-client.on("interactionCreate", async interaction => {
-  if (!interaction.isCommand()) return;
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isCommand()) return;
 
-  const { commandName } = interaction;
+    const { commandName } = interaction;
 
-  if (commandName === "greet") {
-    const user = interaction.options.getUser("target");
-    await interaction.reply(`Hallo, ${user}!`);
-  }
+    if (commandName === 'role') {
+        const user = interaction.options.getUser('user');
+        const roleNameOrId = interaction.options.getRole('role')?.name || interaction.options.getRole('role')?.id;
+
+        async function getRole(guild, roleNameOrId) {
+            // Zuerst nach der ID suchen
+            const roleById = guild.roles.cache.get(roleNameOrId);
+            if (roleById) return roleById;
+
+            // Wenn keine ID gefunden wurde, nach dem Namen suchen
+            const roleByName = guild.roles.cache.find(role => role.name === roleNameOrId);
+            return roleByName;
+        }
+
+        const role = await getRole(interaction.guild, roleNameOrId);
+
+        if (!role) {
+            return interaction.reply('Die angegebene Rolle konnte nicht gefunden werden.');
+        }
+
+        // Überprüfe, ob der Benutzer die Admin-Rolle hat
+        if (!interaction.member.roles.cache.has(adminRoleId)) {
+            return interaction.reply('Du hast keine Berechtigung, diese Aktion auszuführen.');
+        }
+
+        try {
+            // Zusätzliche Überprüfung, um sicherzustellen, dass role.id definiert ist
+            if (!role.id) {
+                console.error('Fehler: Die Rolle hat keine gültige ID.');
+                return interaction.reply('Ein Fehler ist aufgetreten. Bitte versuche es später noch einmal.');
+            }
+
+            // Rollenverwaltung mit Fehlerbehandlung und klarer Nachricht
+            const hasRole = user.roles.cache.has(role.id);
+            await user.roles[hasRole ? 'remove' : 'add'](role);
+            await interaction.reply(`Rolle ${role.name} wurde ${hasRole ? 'entfernt' : 'hinzugefügt'}.`);
+        } catch (error) {
+            console.error('Fehler beim Verwalten der Rolle:', error);
+            await interaction.reply('Ein unerwarteter Fehler ist aufgetreten. Bitte kontaktiere einen Administrator.');
+        }
+    }
 });
 
-client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-
-  const commandData = new SlashCommandBuilder()
-    .setName("zeit")
-    .setDescription("Zeigt die aktuelle Uhrzeit an");
-
-  client.application.commands.create(commandData);
-});
-
-client.on("interactionCreate", async interaction => {
-  if (!interaction.isCommand()) return;
-
-  const { commandName } = interaction;
-
-  if (commandName === "zeit") {
-    const options = {
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: true,
-    };
-    const formatter = new Intl.DateTimeFormat("de-DE", options); // Ändere 'de-DE' auf deine gewünschte Sprache
-    const now = new Date();
-    const formattedTime = formatter.format(now);
-
-    await interaction.reply(`Es ist gerade: ${formattedTime}`);
-  }
-});
-
-client.login(
-  "MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECyJMDD6XQ"
-);
-
-//MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECyJMDD6XQ
+client.login(token);
