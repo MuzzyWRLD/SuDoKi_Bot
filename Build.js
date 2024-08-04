@@ -6,6 +6,16 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 const token = "MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECyJMDD6XQ";
 const adminRoleId = "1247589119375183912";
 
+async function getRole(guild, roleNameOrId) {
+  try {
+      const roles = await guild.roles.fetch();
+      return roles.cache.find(role => role.id === roleNameOrId || role.name === roleNameOrId);
+  } catch (error) {
+      console.error('Fehler beim Abrufen der Rollen:', error);
+      return null; // oder eine andere geeignete Fehlerbehandlung
+  }
+}
+
 client.on('ready', () => {
     console.log(`Eingeloggt als ${client.user.tag}!`);
 
@@ -13,7 +23,7 @@ client.on('ready', () => {
     const commands = [
         new SlashCommandBuilder()
             .setName('role')
-            .setDescription('Verwaltet Rollen')
+            .setDescription('set role')
             .addUserOption(option =>
                 option
                     .setName('user')
@@ -41,13 +51,13 @@ client.on('interactionCreate', async interaction => {
         const roleNameOrId = interaction.options.getRole('role')?.name || interaction.options.getRole('role')?.id;
 
         async function getRole(guild, roleNameOrId) {
-            // Zuerst nach der ID suchen
-            const roleById = guild.roles.cache.get(roleNameOrId);
-            if (roleById) return roleById;
+            // Zuerst im Cache suchen (für schnellere Abrufe)
+            const roleFromCache = guild.roles.cache.get(roleNameOrId);
+            if (roleFromCache) return roleFromCache;
 
-            // Wenn keine ID gefunden wurde, nach dem Namen suchen
-            const roleByName = guild.roles.cache.find(role => role.name === roleNameOrId);
-            return roleByName;
+            // Wenn nicht im Cache gefunden, direkt von der API holen
+            const roles = await guild.roles.fetch();
+            return roles.cache.find(role => role.id === roleNameOrId || role.name === roleNameOrId);
         }
 
         const role = await getRole(interaction.guild, roleNameOrId);
