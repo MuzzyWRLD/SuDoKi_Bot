@@ -46,17 +46,23 @@ client.on('interactionCreate', async interaction => {
     }
 
     try {
-      // Sicherstellen, dass wir ein GuildMember-Objekt haben
-      const member = await interaction.guild.members.fetch(user.id);
-
-      const hasRole = member.roles.cache.has(role.id);
-      await member.roles[hasRole ? 'remove' : 'add'](role);
-      await interaction.reply(`Rolle ${role.name} wurde ${hasRole ? 'entfernt' : 'hinzugefügt'}.`);
-    } catch (error) {
-      console.error('Fehler beim Verwalten der Rolle:', error);
-      await interaction.reply('Ein unerwarteter Fehler ist aufgetreten. Bitte kontaktiere einen Administrator.');
+        // Sicherstellen, dass wir ein GuildMember-Objekt haben
+        const member = await interaction.guild.members.fetch(user.id);
+      
+        const hasRole = member.roles.cache.has(role.id);
+        await member.roles[hasRole ? 'remove' : 'add'](role);
+        await interaction.reply({
+            content: `**Hinzugefügt** die Rolle **${role.name}** für ${user.username}.`,
+            ephemeral: true
+          });
+        } catch (error) {
+          console.error('Fehler beim Verwalten der Rolle:', error);
+          await interaction.reply({
+            content: 'Ein unerwarteter Fehler ist aufgetreten. Bitte kontaktiere einen Administrator.',
+            ephemeral: true
+          });
+        }
     }
-  }
-});
-
+});      
+  
 client.login(token);
