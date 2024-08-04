@@ -1,4 +1,11 @@
 {
+  "name": "my-discord-bot",
+  "version": "1.0.0",
+  "description": "My Discord bot",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
   "dependencies": {
     "discord.js": "^14.15.3"
   }
