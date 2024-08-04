@@ -7,14 +7,15 @@ const token = "MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECy
 const adminRoleId = "1247589119375183912";
 
 async function getRole(guild, roleNameOrId) {
-  try {
+    try {
       const roles = await guild.roles.fetch();
       return roles.cache.find(role => role.id === roleNameOrId || role.name === roleNameOrId);
-  } catch (error) {
+    } catch (error) {
       console.error('Fehler beim Abrufen der Rollen:', error);
       return null; // oder eine andere geeignete Fehlerbehandlung
+    }
   }
-}
+  
 
 client.on('ready', () => {
     console.log(`Eingeloggt als ${client.user.tag}!`);
