@@ -59,7 +59,7 @@ client.on('interactionCreate', async interaction => {
           console.error('Fehler beim Verwalten der Rolle:', error);
           await interaction.reply({
             content: 'Ein unerwarteter Fehler ist aufgetreten. Bitte kontaktiere einen Administrator.',
-            ephemeral: true
+            ephemeral: false
           });
         }
     }
