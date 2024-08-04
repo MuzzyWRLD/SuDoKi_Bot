@@ -52,8 +52,8 @@ client.on('interactionCreate', async interaction => {
         const hasRole = member.roles.cache.has(role.id);
         await member.roles[hasRole ? 'remove' : 'add'](role);
         await interaction.reply({
-            content: `**Hinzugefügt** die Rolle **${role.name}** für ${user.username}.`,
-            ephemeral: true
+          content: `**${hasRole ? 'Entfernt' : 'Hinzugefügt'}** : Rolle <@&${role.id}> für <@${user.id}>.`,
+            ephemeral: false
           });
         } catch (error) {
           console.error('Fehler beim Verwalten der Rolle:', error);
