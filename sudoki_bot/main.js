@@ -3,8 +3,8 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, Permissions } = require(
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
 // Ersetze mit deinem Bot-Token und der tatsächlichen Rollen-ID
-const token = "MTI2MjQ5NTQzNjM4MDMxMTYzNQ.GKCt1h.rncoeMzoxLnn-aSq_bR0JYjrM83RECyJMDD6XQ";
-const adminRoleId = "1247589119375183912";
+const token = "DISCORD_BOT_TOKEN";
+const adminRoleId = "UR_ADMIN_ROLE_ID_FROM_UR_SERVER";
 
 client.on('ready', () => {
   console.log(`Eingeloggt als ${client.user.tag}!`);
